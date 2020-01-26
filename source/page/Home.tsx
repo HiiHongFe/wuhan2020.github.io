@@ -8,7 +8,7 @@ export function HomePage() {
     return (
         <Fragment>
             <Jumbotron
-                title="2020 援助武汉"
+                title="2020 援助武汉！"
                 description="新冠病毒疫情中的武汉援助信息网站"
             />
             <div className="container card-deck m-auto text-center">
