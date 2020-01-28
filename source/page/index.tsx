@@ -2,12 +2,17 @@ import { component, createCell, Fragment } from 'web-cell';
 import { observer } from 'mobx-web-cell';
 import { HTMLRouter } from 'cell-router/source';
 import { NavBar } from 'boot-cell/source/Navigator/NavBar';
+import { DropMenu } from 'boot-cell/source/Navigator/DropMenu';
 
-import { history } from '../model';
+import { history, session } from '../model';
 import menu from './menu';
+
 import { HomePage } from './Home';
 import { HospitalPage } from './Hospital';
+import { HospitalEdit } from './Hospital/Edit';
 import { LogisticsPage } from './Logistics';
+
+import './index.css';
 
 @observer
 @component({
@@ -19,16 +24,48 @@ export class PageRouter extends HTMLRouter {
     protected routes = [
         { paths: [''], component: HomePage },
         { paths: ['hospital'], component: HospitalPage },
+        { paths: ['hospital/edit'], component: HospitalEdit },
         { paths: ['logistics'], component: LogisticsPage }
     ];
 
+    async signOut() {
+        await session.signOut();
+
+        location.href = '.';
+    }
+
     render() {
         return (
-            <Fragment>
-                <NavBar title="2020 援助武汉" menu={menu} narrow />
+            <div className="wrapper">
+                <NavBar
+                    title="2020 援助武汉"
+                    menu={menu.map(({ title, href }) => ({
+                        title,
+                        href,
+                        active:
+                            history.path === href ||
+                            (!!href && history.path.startsWith(href))
+                    }))}
+                    narrow
+                >
+                    {session.user && (
+                        <DropMenu
+                            title={session.user.username}
+                            alignType="right"
+                            alignSize="md"
+                            list={[
+                                {
+                                    title: '登出',
+                                    href: '#',
+                                    onClick: this.signOut
+                                }
+                            ]}
+                        />
+                    )}
+                </NavBar>
 
                 <main
-                    className="container my-5 pt-3"
+                    className="main-container container my-5 pt-3"
                     style={{ minHeight: '60vh' }}
                 >
                     {super.render()}
@@ -52,7 +89,7 @@ export class PageRouter extends HTMLRouter {
                         BootCell v1
                     </a>
                 </footer>
-            </Fragment>
+            </div>
         );
     }
 }
